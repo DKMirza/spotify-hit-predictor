@@ -10,6 +10,18 @@
 
 **Data Transformation & Model:** Removed bad values and outliers, standardized columns, dropped NaNs and duplicates, converted duration to minutes. Trained hit classifier and ranked feature importance.
 
-**Special Instructions:** Run batch_ingest.py then transform.py before training model.py. Convert pickle to CSV for Power BI import if reproducing locally.
+**Special Instructions:** 
+1. Put project files in one folder and install dependencies from requirements.txt.  
+2. Run `python batch_ingest.py` or trigger Airflow DAG `batch_ingest_dag` to ingest raw CSV to data.pkl.  
+3. Run `python transform.py` (or let the DAG run it) to create `clean_spotify.pkl` and `clean_spotify.csv`.  
+4. Run `python model.py` to train and save `rf_model.pkl` and `feature_importance.pkl`.  
+5. Open Power BI and import `clean_spotify.csv` and `feature_importance.pkl` (or CSV derived from it) to recreate dashboards.
 
-**Repo Link:** Private GitHub repository submitted separately for replication and review.
+**Deliverables:**
+- ETL code (Airflow DAG + Python scripts)  
+- Cleaned dataset: `clean_spotify.pkl` and `clean_spotify.csv`  
+- Trained model: `rf_model.pkl` and `feature_importance.pkl`  
+- Power BI `.pbix` dashboard (export saved locally)  
+- Final report PDF and infographics
+
+**Repo Link:** https://github.com/DKMirza/ECE_5984_Data_Engineering_Project

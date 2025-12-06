@@ -11,17 +11,17 @@ with open("clean_spotify.pkl", "rb") as f:
 print("=== Spotify Dataset Overview ===")
 print(raw_data.info())
 print("Shape:", raw_data.shape)
-print("====================================")
+print("\n====================================\n")
 
 # Display summary stats
 print("Descriptive statistics:")
 print(raw_data.describe().T)
-print("====================================")
+print("\n====================================\n")
 
 # Missing values
 print("Missing values by column:")
 print(raw_data.isnull().sum().sort_values(ascending=False))
-print("====================================")
+print("\n====================================\n")
 
 # Check for duplicates
 print("Duplicate rows:", raw_data.duplicated().sum())

@@ -1,0 +1,61 @@
+Power BI Dashboard Reproduction Guide
+
+Step 0: Prerequisites
+- Have Power BI Desktop installed.
+- Place exported CSV files (clean_spotify.csv and feature_importance.csv) locally or make them accessible via a network path.
+- Optional: Install R or Python support in Power BI if using scripts.
+
+Step 1: Prepare data files
+- If you have only pickle files, convert them to CSV locally:
+    import pandas as pd
+    df = pd.read_pickle("clean_spotify.pkl")
+    df.to_csv("clean_spotify.csv", index=False)
+    importance = pd.read_pickle("feature_importance.pkl")
+    importance.to_csv("feature_importance.csv", index=False)
+
+Step 2: Import datasets into Power BI
+- Open Power BI Desktop -> Get data -> Text/CSV -> select clean_spotify.csv
+- Repeat for feature_importance.csv
+
+Step 3: Data model adjustments
+- Ensure data types:
+  - popularity: Whole Number
+  - tempo, loudness, duration_min, danceability, energy, valence, etc: Decimal Number
+  - genre, artist_name, track_name: Text
+  - key, mode: Whole Number (or categorical)
+- Create calculated fields if desired.
+
+Step 4: Suggested visuals (create these pages)
+1) Overview page
+   - KPI: average popularity, number of tracks, number of unique genres
+   - Slicer: genre, mode, tempo range
+
+2) Feature relationships
+   - Scatter plot: Danceability (X) vs Popularity (Y) with trendline. Color by genre.
+   - Scatter plot: Loudness vs Popularity. Add tooltip: artist_name, track_name.
+   - Scatter plot: Tempo vs Popularity with size mapped to energy.
+
+3) Genre summary
+   - Bar chart: Sum or average popularity by genre (sorted descending).
+   - Treemap: Popular artists by popularity within selected genre.
+
+4) Tempo and distribution
+   - Histogram: Tempo distribution across all tracks; conditional formatting for popular tracks.
+   - Line or density plot: popularity aggregated by tempo bins.
+
+5) Model insights
+   - Bar chart: feature_importance (feature vs importance) using feature_importance.csv.
+   - Table: Top predicted "hit" tracks if you exported model predictions to CSV.
+
+Step 5: Interactivity and filters
+- Add slicers: genre, artist_name (top N), popularity range, tempo range, release decade.
+- Use cross-filtering between visuals for interactive exploration.
+
+Step 6: Export and share
+- Save the PBIX file locally as Spotify_Hit_Predictor_Dashboard.pbix
+- Export static images for the final report: File -> Export -> PDF or use "Save as" and take screenshots.
+
+Notes:
+- If you want to show model predictions, generate a CSV with rf_model predictions:
+    - Load rf_model.pkl locally and df, create df["predicted_hit"] and save.
+- Keep visualizations simple and readable; annotate top insights with text boxes.

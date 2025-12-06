@@ -1,41 +1,55 @@
-from s3fs.core import S3FileSystem
 import pickle
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-def train_model():
-    s3 = S3FileSystem()
-    DIR = "s3://ece5984-s3-dkmirza/Project1/"
+# Load your cleaned dataset (output of transform.py)
+print("Loading cleaned dataset...")
+with open("clean_spotify.pkl", "rb") as f:
+    df = pickle.load(f)
+print("Loaded dataset with shape:", df.shape)
 
-    # Load your cleaned dataset (output of transform.py)
-    with s3.open(f"{DIR}clean_spotify.pkl", "rb") as f:
-        df = pickle.load(f)
+# Define hit song threshold
+df["hit"] = (df["popularity"] >= 90).astype(int)
+print("Created 'hit' label. Number of hit songs:", df["hit"].sum())
 
-    # Define hit song threshold
-    df["hit"] = (df["popularity"] >= 90).astype(int)
+# Encode categorical variables
+df["mode"] = df["mode"].replace({"Major": 1, "Minor": 0}).infer_objects(copy=False).astype(int)
+df["key"] = pd.factorize(df["key"])[0]  # Encode keys C#, A, etc.
+print("Encoded categorical columns: mode, key")
 
-    # Train Random Forest Model
-    features = ["acousticness", "danceability", "duration_min",
-                "energy", "instrumentalness", "key", "liveness",
-                "loudness", "mode", "speechiness", "tempo", "valence"]
+# Train Random Forest Model
+features = ["acousticness", "danceability", "duration_min",
+            "energy", "instrumentalness", "key", "liveness",
+            "loudness", "mode", "speechiness", "tempo", "valence"]
 
-    X = df[features]
-    y = df["hit"]
+X = df[features]
+y = df["hit"]
+print("Training data prepared. Feature matrix shape:", X.shape)
 
-    rf = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf.fit(X, y)
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+print("Training Random Forest model...")
+rf.fit(X, y)
+print("Model training complete.")
 
-    # Save model
-    with s3.open(f"{DIR}rf_model.pkl", "wb") as f:
-        f.write(pickle.dumps(rf))
+# Save model
+with open("rf_model.pkl", "wb") as f:
+    pickle.dump(rf, f)
+print("Saved Random Forest model -> rf_model.pkl")
 
-    # Save feature importance results
-    importance = pd.DataFrame({
-        "feature": features,
-        "importance": rf.feature_importances_
-    }).sort_values(by="importance", ascending=False)
+# Save feature importance results
+importance = pd.DataFrame({
+    "feature": features,
+    "importance": rf.feature_importances_
+}).sort_values(by="importance", ascending=False)
 
-    with s3.open(f"{DIR}feature_importance.pkl", "wb") as f:
-        f.write(pickle.dumps(importance))
+with open("feature_importance.pkl", "wb") as f:
+    pickle.dump(importance, f)
+print("Saved feature importances -> feature_importance.pkl")
 
-    print("✅ Model training complete. Model and feature importance saved to S3.")
+df.to_csv("clean_spotify.csv", index=False)
+print("Converted clean_spotify pkl to csv for PowerBI")
+
+importance.to_csv("feature_importance.csv", index=False)
+print("Converted feature_importance pkl to csv for PowerBI")
+
+print("✅ Model training complete. Model and feature importance saved locally.")
